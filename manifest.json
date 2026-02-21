@@ -1,0 +1,36 @@
+{
+  "name": "Moje Finance Pro",
+  "short_name": "Finance Pro",
+  "description": "Kompletní správa osobních financí - účty, transakce, obálky, cíle a grafy",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#10b981",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "productivity", "lifestyle"],
+  "shortcuts": [
+    {
+      "name": "Přidat transakci",
+      "short_name": "Transakce",
+      "description": "Rychle přidat novou transakci",
+      "url": "./?action=add",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "lang": "cs-CZ",
+  "dir": "ltr"
+}
