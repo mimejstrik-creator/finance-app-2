@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finance App - Tmavý Režim</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0e27;
+      color: #e4e4e7;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0;
+      padding-bottom: 80px;
+    }
+
+    .content {
+      padding: 20px;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .hamburger {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      cursor: pointer;
+      padding: 6px 0;
+    }
+
+    .hamburger span {
+      width: 100%;
+      height: 3px;
+      background: #10b981;
+      border-radius: 2px;
+      transition: all 0.3s;
+    }
+
+    .top-bar-title {
+      flex: 1;
+      font-size: 20px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #10b981, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Side Menu */
+    .side-menu {
+      position: fixed;
+      top: 0;
+      left: -300px;
+      width: 280px;
+      height: 100%;
+      background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+      z-index: 1001;
+      transition: left 0.3s ease;
+      overflow-y: auto;
+      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .side-menu.open {
+      left: 0;
+    }
+
+    .menu-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      display: none;
+    }
+
+    .menu-overlay.show {
+      display: block;
+    }
+
+    .menu-header {
+      padding: 30px 20px 20px;
+      border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .menu-title {
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #10b981, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .menu-item {
+      padding: 16px 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 3px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 15px;
+      color: #94a3b8;
+    }
+
+    .menu-item:hover {
+      background: rgba(16, 185, 129, 0.1);
+      border-left-color: #10b981;
+      color: #e4e4e7;
+    }
+
+    .menu-item-icon {
+      font-size: 20px;
+      width: 28px;
+      text-align: center;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      padding: 30px;
+      border-radius: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .balance {
+      text-align: center;
+    }
+
+    .balance-label {
+      font-size: 14px;
+      color: #94a3b8;
+      margin-bottom: 8px;
+    }
+
+    .balance-amount {
+      font-size: 48px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #10b981, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .stat-card {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .stat-value.income {
+      color: #10b981;
+    }
+
+    .stat-value.expense {
+      color: #ef4444;
+    }
+
+    /* Navigation */
+    .nav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+    }
+
+    .nav::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    .nav::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 2px;
+    }
+
+    .nav::-webkit-scrollbar-thumb {
+      background: #10b981;
+      border-radius: 2px;
+    }
+
+    .nav-btn {
+      padding: 12px 24px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #94a3b8;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: all 0.3s;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: #10b981;
+    }
+
+    .nav-btn.active {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border-color: transparent;
+      color: white;
+    }
+
+    /* Tabs */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Card */
+    .card {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border-radius: 16px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #10b981;
+    }
+
+    /* Account Card */
+    .account-card {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .account-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: #10b981;
+      transform: translateY(-2px);
+    }
+
+    .account-name {
+      font-size: 16px;
+      color: #94a3b8;
+      margin-bottom: 8px;
+    }
+
+    .account-balance {
+      font-size: 28px;
+      font-weight: 700;
+      color: #10b981;
+    }
+
+    /* Transaction Item */
+    .transaction-item {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .transaction-item:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: #10b981;
+      transform: translateX(4px);
+    }
+
+    .transaction-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-right: 16px;
+    }
+
+    .transaction-info {
+      flex: 1;
+    }
+
+    .transaction-description {
+      font-size: 16px;
+      font-weight: 600;
+      color: #e4e4e7;
+      margin-bottom: 4px;
+    }
+
+    .transaction-category {
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
+    .transaction-amount {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .transaction-amount.income {
+      color: #10b981;
+    }
+
+    .transaction-amount.expense {
+      color: #ef4444;
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: #e4e4e7;
+      font-size: 15px;
+      transition: all 0.3s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #10b981;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    input::placeholder {
+      color: #64748b;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: #94a3b8;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+    }
+
+    /* Type Toggle */
+    .type-toggle {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .type-btn {
+      flex: 1;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: #94a3b8;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .type-btn.active.income {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      border-color: transparent;
+    }
+
+    .type-btn.active.expense {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+      border-color: transparent;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    }
+
+    .modal-header {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 25px;
+      color: #10b981;
+    }
+
+    /* FAB */
+    .fab {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+      transition: all 0.3s;
+      border: none;
+      z-index: 100;
+    }
+
+    .fab:hover {
+      transform: scale(1.1) rotate(90deg);
+      box-shadow: 0 12px 32px rgba(16, 185, 129, 0.6);
+    }
+
+    /* Search Bar */
+    .search-bar {
+      margin-bottom: 20px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 14px 20px 14px 50px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: #e4e4e7;
+      font-size: 15px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: 16px center;
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #06b6d4);
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #64748b;
+    }
+
+    .empty-state-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      opacity: 0.3;
+    }
+
+    .empty-state-text {
+      font-size: 16px;
+    }
+
+    /* Category Badge */
+    .category-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin: 4px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #10b981;
+      border-radius: 4px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .stats-row {
+        flex-direction: column;
+      }
+
+      .balance-amount {
+        font-size: 36px;
+      }
+
+      .fab {
+        bottom: 20px;
+        right: 20px;
+        width: 56px;
+        height: 56px;
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Menu Overlay -->
+  <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+
+  <!-- Side Menu -->
+  <div class="side-menu" id="sideMenu">
+    <div class="menu-header">
+      <div class="menu-title">Menu</div>
+    </div>
+    <div class="menu-item" onclick="openCategories()">
+      <span class="menu-item-icon">🏷️</span>
+      <span>Kategorie</span>
+    </div>
+    <div class="menu-item" onclick="openRecurringModal()">
+      <span class="menu-item-icon">🔄</span>
+      <span>Trvalé příkazy</span>
+    </div>
+    <div class="menu-item" onclick="openAccountsModal()">
+      <span class="menu-item-icon">🏦</span>
+      <span>Správa účtů</span>
+    </div>
+    <div class="menu-item" onclick="openTransfersModal()">
+      <span class="menu-item-icon">💸</span>
+      <span>Převody mezi účty</span>
+    </div>
+    <div class="menu-item" onclick="openEnvelopesModal()">
+      <span class="menu-item-icon">✉️</span>
+      <span>Obálky</span>
+    </div>
+    <div class="menu-item" onclick="openGoalsModal()">
+      <span class="menu-item-icon">🎯</span>
+      <span>Finanční cíle</span>
+    </div>
+  </div>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="hamburger" onclick="toggleMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <div class="top-bar-title">Finance App</div>
+  </div>
+
+  <div class="container">
+    <div class="content">
+    <!-- Header -->
+    <!-- Navigation -->
+    <div class="nav">
+      <button class="nav-btn active" onclick="switchTab('overview')">Přehled</button>
+      <button class="nav-btn" onclick="switchTab('transactions')">Transakce</button>
+      <button class="nav-btn" onclick="switchTab('stats')">Statistiky</button>
+      <button class="nav-btn" onclick="switchTab('graphs')">Grafy</button>
+    </div>
+
+    <!-- Overview Tab -->
+    <div id="overview" class="tab-content active">
+      <!-- Balance Section -->
+      <div style="margin-bottom: 30px;">
+        <div class="balance-label">Celkový zůstatek</div>
+        <div class="balance-amount" id="totalBalance">0 Kč</div>
+      </div>
+
+      <!-- Accounts Grid (2x2) -->
+      <div id="accountsGrid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px;"></div>
+
+      <!-- This Month Card -->
+      <div class="card">
+        <div class="card-title">Tento měsíc</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <div style="background: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.3);">
+            <div style="font-size: 13px; color: #94a3b8; margin-bottom: 8px;">Příjmy</div>
+            <div style="font-size: 24px; font-weight: 700; color: #10b981;" id="monthIncome">+0 Kč</div>
+          </div>
+          <div style="background: rgba(239, 68, 68, 0.1); padding: 20px; border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.3);">
+            <div style="font-size: 13px; color: #94a3b8; margin-bottom: 8px;">Výdaje</div>
+            <div style="font-size: 24px; font-weight: 700; color: #ef4444;" id="monthExpense">-0 Kč</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Transactions -->
+      <div class="card">
+        <div class="card-title">Poslední transakce</div>
+        <div id="recentTransactions"></div>
+      </div>
+    </div>
+
+    <!-- Transactions Tab -->
+    <div id="transactions" class="tab-content">
+      <div class="card">
+        <div class="search-bar">
+          <input type="text" class="search-input" placeholder="Hledat transakce..." id="searchInput" oninput="searchTransactions()">
+        </div>
+        <div id="transactionsList"></div>
+      </div>
+    </div>
+
+    <!-- Stats Tab -->
+    <div id="stats" class="tab-content">
+      <div class="card">
+        <div class="card-title">Statistiky</div>
+        <div class="empty-state">
+          <div class="empty-state-icon">📊</div>
+          <div class="empty-state-text">Funkce v přípravě...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Graphs Tab -->
+    <div id="graphs" class="tab-content">
+      <div class="card">
+        <div class="card-title">Grafy</div>
+        <div class="empty-state">
+          <div class="empty-state-icon">📈</div>
+          <div class="empty-state-text">Funkce v přípravě...</div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <!-- FAB -->
+  <button class="fab" onclick="showAddModal()">+</button>
+
+  <!-- Add Transaction Modal -->
+  <div id="addModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">Nová transakce</div>
+      
+      <div class="type-toggle">
+        <button class="type-btn active income" id="incomeBtn" onclick="setType('income')">Příjem</button>
+        <button class="type-btn expense" id="expenseBtn" onclick="setType('expense')">Výdaj</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Popisek</label>
+        <input type="text" id="description" placeholder="např. Nákup v Albertu">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Částka (Kč)</label>
+        <input type="number" id="amount" placeholder="0">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Kategorie</label>
+        <select id="category"></select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Účet</label>
+        <select id="account"></select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Datum</label>
+        <input type="date" id="date">
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="closeModal('addModal')">Zrušit</button>
+        <button class="btn btn-primary" onclick="addTransaction()">Přidat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Transaction Modal -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">Upravit transakci</div>
+
+      <div class="form-group">
+        <label class="form-label">Popisek</label>
+        <input type="text" id="editDescription">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Částka (Kč)</label>
+        <input type="number" id="editAmount">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Kategorie</label>
+        <select id="editCategory"></select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Účet</label>
+        <select id="editAccount"></select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Datum</label>
+        <input type="date" id="editDate">
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-danger" onclick="deleteTransaction()">Smazat</button>
+        <button class="btn btn-secondary" onclick="closeModal('editModal')">Zrušit</button>
+        <button class="btn btn-primary" onclick="saveTransaction()">Uložit</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Data structure
+    let data = {
+      transactions: [],
+      categories: {
+        income: [
+          { name: 'Mzda', color: '#10b981' },
+          { name: 'Podnikání', color: '#06b6d4' },
+          { name: 'Investice', color: '#8b5cf6' },
+          { name: 'Ostatní', color: '#6b7280' }
+        ],
+        expense: [
+          { name: 'Jídlo', color: '#ef4444' },
+          { name: 'Bydlení', color: '#f59e0b' },
+          { name: 'Doprava', color: '#3b82f6' },
+          { name: 'Zábava', color: '#ec4899' },
+          { name: 'Zdraví', color: '#14b8a6' },
+          { name: 'Oblečení', color: '#a855f7' },
+          { name: 'Ostatní', color: '#6b7280' }
+        ]
+      },
+      accounts: [
+        { id: 'cash', name: 'Hotovost', icon: '💵', balance: 0 },
+        { id: 'checking', name: 'Běžný účet', icon: '💳', balance: 0 },
+        { id: 'savings', name: 'Spořící účet', icon: '🏦', balance: 0 },
+        { id: 'business', name: 'Podnikatelský účet', icon: '💼', balance: 0 }
+      ],
+      recurring: [],
+      envelopes: [],
+      goals: []
+    };
+
+    let currentType = 'expense';
+    let editingId = null;
+
+    // Load data
+    function loadData() {
+      const saved = localStorage.getItem('financeApp');
+      if (saved) {
+        data = JSON.parse(saved);
+      }
+      updateUI();
+    }
+
+    // Save data
+    function saveData() {
+      localStorage.setItem('financeApp', JSON.stringify(data));
+    }
+
+    // Format currency
+    function formatCurrency(amount) {
+      return amount.toLocaleString('cs-CZ') + ' Kč';
+    }
+
+    // Get category color
+    function getCategoryColor(category, type) {
+      const cat = data.categories[type].find(c => c.name === category);
+      return cat ? cat.color : '#6b7280';
+    }
+
+    // Calculate total balance
+    function getTotalBalance() {
+      return data.accounts.reduce((sum, acc) => {
+        const accountTransactions = data.transactions.filter(t => t.account === acc.id);
+        const income = accountTransactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+        const expense = accountTransactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+        return sum + acc.balance + income - expense;
+      }, 0);
+    }
+
+    // Get monthly stats
+    function getMonthlyStats() {
+      const now = new Date();
+      const month = now.getMonth();
+      const year = now.getFullYear();
+
+      const monthTx = data.transactions.filter(t => {
+        const date = new Date(t.date);
+        return date.getMonth() === month && date.getFullYear() === year;
+      });
+
+      const income = monthTx.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+      const expense = monthTx.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+
+      return { income, expense };
+    }
+
+    // Switch tab
+    function switchTab(tabName) {
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.getElementById(tabName).classList.add('active');
+
+      if (tabName === 'transactions') renderTransactions();
+      if (tabName === 'recurring') renderRecurring();
+      if (tabName === 'accounts') renderAccounts();
+      if (tabName === 'envelopes') renderEnvelopes();
+      if (tabName === 'goals') renderGoals();
+    }
+
+    // Show/Close Modal
+    function showModal(id) {
+      document.getElementById(id).classList.add('show');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('show');
+    }
+
+    // Set transaction type
+    function setType(type) {
+      currentType = type;
+      document.getElementById('incomeBtn').classList.remove('active');
+      document.getElementById('expenseBtn').classList.remove('active');
+      
+      if (type === 'income') {
+        document.getElementById('incomeBtn').classList.add('active');
+      } else {
+        document.getElementById('expenseBtn').classList.add('active');
+      }
+
+      updateCategorySelect();
+    }
+
+    // Update category select
+    function updateCategorySelect() {
+      const select = document.getElementById('category');
+      select.innerHTML = '<option value="">Vyberte kategorii</option>';
+      data.categories[currentType].forEach(cat => {
+        select.innerHTML += `<option value="${cat.name}">${cat.name}</option>`;
+      });
+    }
+
+    // Update account select
+    function updateAccountSelect(selectId) {
+      const select = document.getElementById(selectId);
+      select.innerHTML = '';
+      data.accounts.forEach(acc => {
+        select.innerHTML += `<option value="${acc.id}">${acc.icon} ${acc.name}</option>`;
+      });
+    }
+
+    // Show add modal
+    function showAddModal() {
+      updateCategorySelect();
+      updateAccountSelect('account');
+      document.getElementById('date').value = new Date().toISOString().split('T')[0];
+      showModal('addModal');
+    }
+
+    // Add transaction
+    function addTransaction() {
+      const description = document.getElementById('description').value;
+      const amount = parseFloat(document.getElementById('amount').value);
+      const category = document.getElementById('category').value;
+      const account = document.getElementById('account').value;
+      const date = document.getElementById('date').value;
+
+      if (!description || !amount || !category) {
+        alert('Vyplňte všechna pole!');
+        return;
+      }
+
+      data.transactions.push({
+        id: Date.now(),
+        type: currentType,
+        description,
+        amount,
+        category,
+        account,
+        date
+      });
+
+      saveData();
+      updateUI();
+      closeModal('addModal');
+
+      // Reset form
+      document.getElementById('description').value = '';
+      document.getElementById('amount').value = '';
+    }
+
+    // Edit transaction
+    function editTransaction(id) {
+      editingId = id;
+      const tx = data.transactions.find(t => t.id === id);
+      if (!tx) return;
+
+      document.getElementById('editDescription').value = tx.description;
+      document.getElementById('editAmount').value = tx.amount;
+      document.getElementById('editDate').value = tx.date;
+
+      // Update category select
+      const catSelect = document.getElementById('editCategory');
+      catSelect.innerHTML = '';
+      data.categories[tx.type].forEach(cat => {
+        const selected = cat.name === tx.category ? 'selected' : '';
+        catSelect.innerHTML += `<option value="${cat.name}" ${selected}>${cat.name}</option>`;
+      });
+
+      // Update account select
+      updateAccountSelect('editAccount');
+      document.getElementById('editAccount').value = tx.account;
+
+      showModal('editModal');
+    }
+
+    // Save transaction
+    function saveTransaction() {
+      const tx = data.transactions.find(t => t.id === editingId);
+      if (!tx) return;
+
+      tx.description = document.getElementById('editDescription').value;
+      tx.amount = parseFloat(document.getElementById('editAmount').value);
+      tx.category = document.getElementById('editCategory').value;
+      tx.account = document.getElementById('editAccount').value;
+      tx.date = document.getElementById('editDate').value;
+
+      saveData();
+      updateUI();
+      closeModal('editModal');
+      editingId = null;
+    }
+
+    // Delete transaction
+    function deleteTransaction() {
+      if (!confirm('Opravdu smazat tuto transakci?')) return;
+
+      data.transactions = data.transactions.filter(t => t.id !== editingId);
+      saveData();
+      updateUI();
+      closeModal('editModal');
+      editingId = null;
+    }
+
+    // Render transactions
+    function renderTransactions() {
+      const list = document.getElementById('transactionsList');
+      
+      if (data.transactions.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📋</div>
+            <div class="empty-state-text">Zatím žádné transakce<br>Klikni na + pro přidání</div>
+          </div>
+        `;
+        return;
+      }
+
+      const sorted = [...data.transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      list.innerHTML = sorted.map(tx => {
+        const color = getCategoryColor(tx.category, tx.type);
+        const account = data.accounts.find(a => a.id === tx.account);
+        const icon = tx.type === 'income' ? '↑' : '↓';
+        
+        return `
+          <div class="transaction-item" onclick="editTransaction(${tx.id})">
+            <div class="transaction-icon" style="background: ${color};">
+              ${icon}
+            </div>
+            <div class="transaction-info">
+              <div class="transaction-description">${tx.description}</div>
+              <div class="transaction-category">${tx.category} • ${account ? account.icon + ' ' + account.name : ''} • ${new Date(tx.date).toLocaleDateString('cs-CZ')}</div>
+            </div>
+            <div class="transaction-amount ${tx.type}">
+              ${tx.type === 'income' ? '+' : '-'}${formatCurrency(tx.amount)}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Search transactions
+    function searchTransactions() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = data.transactions.filter(tx => 
+        tx.description.toLowerCase().includes(query) ||
+        tx.category.toLowerCase().includes(query)
+      );
+
+      const list = document.getElementById('transactionsList');
+      
+      if (filtered.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🔍</div>
+            <div class="empty-state-text">Žádné výsledky</div>
+          </div>
+        `;
+        return;
+      }
+
+      const sorted = [...filtered].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      list.innerHTML = sorted.map(tx => {
+        const color = getCategoryColor(tx.category, tx.type);
+        const account = data.accounts.find(a => a.id === tx.account);
+        const icon = tx.type === 'income' ? '↑' : '↓';
+        
+        return `
+          <div class="transaction-item" onclick="editTransaction(${tx.id})">
+            <div class="transaction-icon" style="background: ${color};">
+              ${icon}
+            </div>
+            <div class="transaction-info">
+              <div class="transaction-description">${tx.description}</div>
+              <div class="transaction-category">${tx.category} • ${account ? account.icon + ' ' + account.name : ''} • ${new Date(tx.date).toLocaleDateString('cs-CZ')}</div>
+            </div>
+            <div class="transaction-amount ${tx.type}">
+              ${tx.type === 'income' ? '+' : '-'}${formatCurrency(tx.amount)}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Render recurring
+    function renderRecurring() {
+      const list = document.getElementById('recurringList');
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">🔄</div>
+          <div class="empty-state-text">Funkce v přípravě...</div>
+        </div>
+      `;
+    }
+
+    // Render accounts
+    function renderAccounts() {
+      const list = document.getElementById('accountsList');
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">🏦</div>
+          <div class="empty-state-text">Funkce v přípravě...</div>
+        </div>
+      `;
+    }
+
+    // Render envelopes
+    function renderEnvelopes() {
+      const list = document.getElementById('envelopesList');
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">✉️</div>
+          <div class="empty-state-text">Funkce v přípravě...</div>
+        </div>
+      `;
+    }
+
+    // Render goals
+    function renderGoals() {
+      const list = document.getElementById('goalsList');
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">🎯</div>
+          <div class="empty-state-text">Funkce v přípravě...</div>
+        </div>
+      `;
+    }
+
+    // Update UI
+    function updateUI() {
+      document.getElementById('totalBalance').textContent = formatCurrency(getTotalBalance());
+      
+      const stats = getMonthlyStats();
+      document.getElementById('monthIncome').textContent = '+' + formatCurrency(stats.income);
+      document.getElementById('monthExpense').textContent = '-' + formatCurrency(stats.expense);
+
+      renderAccountsGrid();
+      renderRecentTransactions();
+      renderTransactions();
+    }
+
+    // Render accounts grid
+    function renderAccountsGrid() {
+      const grid = document.getElementById('accountsGrid');
+      if (!grid) return;
+      
+      grid.innerHTML = data.accounts.map(acc => {
+        const balance = getAccountBalance(acc.id);
+        return `
+          <div class="account-card">
+            <div class="account-name">${acc.icon} ${acc.name}</div>
+            <div class="account-balance">${formatCurrency(balance)}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Render recent transactions
+    function renderRecentTransactions() {
+      const list = document.getElementById('recentTransactions');
+      if (!list) return;
+      
+      const recent = [...data.transactions].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+      
+      if (recent.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📋</div>
+            <div class="empty-state-text">Zatím žádné transakce</div>
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = recent.map(tx => {
+        const color = getCategoryColor(tx.category, tx.type);
+        const account = data.accounts.find(a => a.id === tx.account);
+        const icon = tx.type === 'income' ? '↑' : '↓';
+        
+        return `
+          <div class="transaction-item" onclick="editTransaction(${tx.id})">
+            <div class="transaction-icon" style="background: ${color};">
+              ${icon}
+            </div>
+            <div class="transaction-info">
+              <div class="transaction-description">${tx.description}</div>
+              <div class="transaction-category">${tx.category} • ${account ? account.icon + ' ' + account.name : ''} • ${new Date(tx.date).toLocaleDateString('cs-CZ')}</div>
+            </div>
+            <div class="transaction-amount ${tx.type}">
+              ${tx.type === 'income' ? '+' : '-'}${formatCurrency(tx.amount)}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Calculate account balance
+    function getAccountBalance(accountId) {
+      const account = data.accounts.find(a => a.id === accountId);
+      if (!account) return 0;
+      
+      const transactions = data.transactions.filter(t => t.account === accountId);
+      const income = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+      const expense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+      
+      return account.balance + income - expense;
+    }
+
+    // Toggle menu
+    function toggleMenu() {
+      document.getElementById('sideMenu').classList.toggle('open');
+      document.getElementById('menuOverlay').classList.toggle('show');
+    }
+
+    function closeMenu() {
+      document.getElementById('sideMenu').classList.remove('open');
+      document.getElementById('menuOverlay').classList.remove('show');
+    }
+
+    // Placeholder functions for menu items
+    function openCategories() {
+      closeMenu();
+      alert('Kategorie - funkce v přípravě...');
+    }
+
+    function openRecurringModal() {
+      closeMenu();
+      alert('Trvalé příkazy - funkce v přípravě...');
+    }
+
+    function openAccountsModal() {
+      closeMenu();
+      alert('Správa účtů - funkce v přípravě...');
+    }
+
+    function openTransfersModal() {
+      closeMenu();
+      alert('Převody - funkce v přípravě...');
+    }
+
+    function openEnvelopesModal() {
+      closeMenu();
+      alert('Obálky - funkce v přípravě...');
+    }
+
+    function openGoalsModal() {
+      closeMenu();
+      alert('Finanční cíle - funkce v přípravě...');
+    }
+
+    // Initialize
+    loadData();
+  </script>
+</body>
+</html>
